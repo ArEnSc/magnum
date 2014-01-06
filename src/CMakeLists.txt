@@ -57,7 +57,6 @@ set(Magnum_SRCS
     DebugMessage.cpp
     DefaultFramebuffer.cpp
     Framebuffer.cpp
-    Image.cpp
     Mesh.cpp
     MeshView.cpp
     OpenGL.cpp
@@ -176,6 +175,7 @@ set_target_properties(MagnumObjects PROPERTIES COMPILE_FLAGS "-DMagnumObjects_EX
 # Main library
 add_library(Magnum ${SHARED_OR_STATIC}
     ${Magnum_OBJECTS}
+    Image.cpp
     $<TARGET_OBJECTS:MagnumMathObjects>)
 if(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
@@ -250,6 +250,7 @@ if(BUILD_TESTS)
 
     add_library(MagnumTestLib ${SHARED_OR_STATIC}
         ${Magnum_OBJECTS}
+        Image.cpp
         $<TARGET_OBJECTS:MagnumMathObjects>)
     set_target_properties(MagnumTestLib PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)
     target_link_libraries(MagnumTestLib ${Magnum_LIBS})
