@@ -29,7 +29,7 @@
 
 #include "Context.h"
 
-#define None 0L // redef Xlib nonsense
+
 
 namespace Magnum { namespace Platform {
 
@@ -55,70 +55,85 @@ void WindowlessCglApplication::createContext(const Configuration& configuration)
 
 bool WindowlessCglApplication::tryCreateContext(const Configuration&) {
     CORRADE_ASSERT(!c, "Platform::WindowlessCglApplication::tryCreateContext(): context already created", false);
-
-
-    display = XOpenDisplay(nullptr);
-
+    
     /* Check version */
-    GLuint major, minor;
-    CGLGetVersion(display, &major, &minor);
-    if(major == 3 && minor < 2) {
-        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): CGL version 2.1 or greater is required";
+    int nPix = 0;
+    GLint major, minor;
+    CGLGetVersion(&major, &minor);
+    
+    
+    if(major == 2 && minor < 1) {
+        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 2.1 or greater is required";
         return false;
     }
 
-    int configCount = 0;
-    CGLPixelFormatAttribute pfAttributes[4] = {
-    kCGLPFAAccelerated,   
-    kCGLPFAOpenGLProfile, 
-    (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,
-    (CGLPixelFormatAttribute) 0
+    /* Try core version first */
+    CGLPixelFormatAttribute pfAttributesGL4[4] = {
+        kCGLPFAAccelerated,
+        kCGLPFAOpenGLProfile,
+        (CGLPixelFormatAttribute) kCGLOGLPVersion_GL4_Core,
+        (CGLPixelFormatAttribute) 0
     };
-
-    CGLError = CGLChoosePixelFormat(pfAttributes, ,&configCount)
-
-    /* Choose config */
-    //int configCount = 0;
-    //static const int fbAttributes[] = { None };
-    GLXFBConfig* configs = glXChooseFBConfig(display, DefaultScreen(display), fbAttributes, &configCount);
-    if(!configCount) {
-        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): no supported framebuffer configuration found";
-        return false;
+    
+    CGLError cglError = CGLChoosePixelFormat(pfAttributesGL4,&pixelFormat,&nPix);
+    
+    if (cglError == kCGLBadPixelFormat){
+        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 4.0 has failed trying GL version 3.2";
+        
+        CGLPixelFormatAttribute pfAttributesGL3_2[4] = {
+            kCGLPFAAccelerated,
+            kCGLPFAOpenGLProfile,
+            (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,
+            (CGLPixelFormatAttribute) 0
+        };
+        
+        cglError = CGLChoosePixelFormat(pfAttributesGL3_2,&pixelFormat,&nPix);
+        
+        if (cglError == kCGLBadPixelFormat)
+        {
+            Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 3.2 has failed trying GL version 3.0";
+            
+            CGLPixelFormatAttribute pfAttributesGL3[4] = {
+                kCGLPFAAccelerated,
+                kCGLPFAOpenGLProfile,
+                (CGLPixelFormatAttribute) kCGLOGLPVersion_GL3_Core,
+                (CGLPixelFormatAttribute) 0
+            };
+            
+            cglError = CGLChoosePixelFormat(pfAttributesGL3,&pixelFormat,&nPix);
+            
+            if (cglError == kCGLBadPixelFormat){
+                Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 3.0 has failed trying GL version Legacy";
+                
+                CGLPixelFormatAttribute pfAttributesLegacy[4] = {
+                    kCGLPFAAccelerated,
+                    kCGLPFAOpenGLProfile,
+                    (CGLPixelFormatAttribute) kCGLOGLPVersion_Legacy,
+                    (CGLPixelFormatAttribute) 0
+                };
+                
+                cglError = CGLChoosePixelFormat(pfAttributesLegacy,&pixelFormat,&nPix);
+                
+                if(cglError == kCGLBadPixelFormat){
+                    Error() << "Platform::WindowlessCglApplication::tryCreateContext(): Context could not be created";
+                    return false;
+                }
+            }
+        }
     }
 
-    GLint contextAttributes[] = {
-        #ifdef MAGNUM_TARGET_GLES
-        GLX_CONTEXT_MAJOR_VERSION_ARB, 2,
-        GLX_CONTEXT_MINOR_VERSION_ARB, 0,
-        GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
-        #endif
-        0
-    };
+    
+    cglError = CGLCreateContext(pixelFormat, NULL, &context);
+    
 
-    /** @todo Use some extension wrangler for this, not GLEW, as it apparently needs context to create context, yo dawg wtf. */
-    PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glXGetProcAddress((const GLubyte*)"glXCreateContextAttribsARB");
-    context = glXCreateContextAttribsARB(display, configs[0], nullptr, True, contextAttributes);
-    if(!context) {
+    if(cglError == kCGLBadContext) {
         Error() << "Platform::WindowlessCglApplication::tryCreateContext(): cannot create context";
         return false;
     }
+    
+    cglError = CGLSetCurrentContext(context);
 
-    /* Create pbuffer */
-    int pbufferAttributes[] = {
-        GLX_PBUFFER_WIDTH,  32,
-        GLX_PBUFFER_HEIGHT, 32,
-        None
-    };
-    pbuffer = glXCreatePbuffer(display, configs[0], pbufferAttributes);
-
-    XFree(configs);
-
-    /* Set OpenGL context as current */
-    if(!glXMakeContextCurrent(display, pbuffer, pbuffer, context)) {
-        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): cannot make context current";
-        return false;
-    }
-
+    
     c = new Context;
     return true;
 }
@@ -126,8 +141,8 @@ bool WindowlessCglApplication::tryCreateContext(const Configuration&) {
 WindowlessCglApplication::~WindowlessCglApplication() {
     delete c;
 
-    glXMakeCurrent(display, None, nullptr);
-    glXDestroyContext(display, context);
+    CGLDestroyContext(context);
+    CGLDestroyPixelFormat(pixelFormat);
 }
 
 }}

@@ -58,6 +58,7 @@ else()
     cmake_dependent_option(WITH_XEGLAPPLICATION "Build XEglApplication library" OFF "TARGET_GLES" OFF)
     cmake_dependent_option(WITH_GLUTAPPLICATION "Build GlutApplication library" OFF "NOT TARGET_GLES" OFF)
     option(WITH_SDL2APPLICATION "Build Sdl2Application library" OFF)
+    option(WITH_WINDOWLESSCGLAPPLICATION "Build WindowlessCglApplication" OFF)
 endif()
 
 # Utilities (currently depending on WindowlessGlxApplication)
@@ -68,7 +69,6 @@ if(UNIX)
     cmake_dependent_option(WITH_FONTCONVERTER "Build magnum-fontconverter utility" OFF "NOT TARGET_GLES" OFF)
     cmake_dependent_option(WITH_DISTANCEFIELDCONVERTER "Build magnum-distancefieldconverter utility" OFF "NOT TARGET_GLES" OFF)
 endif()
-
 # Plugins
 cmake_dependent_option(WITH_MAGNUMFONT "Build MagnumFont plugin" OFF "WITH_TEXT" OFF)
 cmake_dependent_option(WITH_MAGNUMFONTCONVERTER "Build MagnumFontConverter plugin" OFF "NOT MAGNUM_TARGET_GLES;WITH_TEXT" OFF)

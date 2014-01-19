@@ -35,14 +35,6 @@
 #include <OpenGL/CGLTypes.h>
 #include <OpenGL/CGLCurrent.h>
 
-//#include <GL/glx.h>
-//#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-/* undef Xlib nonsense to avoid conflicts */
-//#undef Complex
-//#undef None
-//#undef Always
-
 #include "Magnum.h"
 
 namespace Magnum { namespace Platform {
@@ -79,7 +71,7 @@ If no other application header is included, this class is also aliased to
 `Platform::WindowlessApplication` and the macro is aliased to
 `MAGNUM_WINDOWLESSAPPLICATION_MAIN()` to simplify porting.
 */
-class WindowlessGlxApplication {
+class WindowlessCglApplication {
     public:
         /** @brief Application arguments */
         struct Arguments {
@@ -91,27 +83,27 @@ class WindowlessGlxApplication {
 
         /** @copydoc Sdl2Application::Sdl2Application(const Arguments&, const Configuration&) */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        explicit WindowlessGlxApplication(const Arguments& arguments, const Configuration& configuration = Configuration());
+        explicit WindowlessCglApplication(const Arguments& arguments, const Configuration& configuration = Configuration());
         #else
         /* To avoid "invalid use of incomplete type" */
-        explicit WindowlessGlxApplication(const Arguments& arguments, const Configuration& configuration);
-        explicit WindowlessGlxApplication(const Arguments& arguments);
+        explicit WindowlessCglApplication(const Arguments& arguments, const Configuration& configuration);
+        explicit WindowlessCglApplication(const Arguments& arguments);
         #endif
 
         /** @copydoc Sdl2Application::Sdl2Application(const Arguments&, std::nullptr_t) */
-        explicit WindowlessGlxApplication(const Arguments& arguments, std::nullptr_t);
+        explicit WindowlessCglApplication(const Arguments& arguments, std::nullptr_t);
 
         /** @brief Copying is not allowed */
-        WindowlessGlxApplication(const WindowlessGlxApplication&) = delete;
+        WindowlessCglApplication(const WindowlessCglApplication&) = delete;
 
         /** @brief Moving is not allowed */
-        WindowlessGlxApplication(WindowlessGlxApplication&&) = delete;
+        WindowlessCglApplication(WindowlessCglApplication&&) = delete;
 
         /** @brief Copying is not allowed */
-        WindowlessGlxApplication& operator=(const WindowlessGlxApplication&) = delete;
+        WindowlessCglApplication& operator=(const WindowlessCglApplication&) = delete;
 
         /** @brief Moving is not allowed */
-        WindowlessGlxApplication& operator=(WindowlessGlxApplication&&) = delete;
+        WindowlessCglApplication& operator=(WindowlessCglApplication&&) = delete;
 
         /**
          * @brief Execute application
@@ -122,7 +114,7 @@ class WindowlessGlxApplication {
     protected:
         /* Nobody will need to have (and delete) WindowlessGlxApplication*,
            thus this is faster than public pure virtual destructor */
-        ~WindowlessGlxApplication();
+        ~WindowlessCglApplication();
 
         /** @copydoc Sdl2Application::createContext() */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -137,9 +129,9 @@ class WindowlessGlxApplication {
         bool tryCreateContext(const Configuration& configuration);
 
     private:
-        Display* display;
+    
         CGLContextObj context;
-        CGLPBufferObj pbuffer;
+        CGLPixelFormatObj pixelFormat;
 
         Context* c;
 };
@@ -150,7 +142,7 @@ class WindowlessGlxApplication {
 @see @ref WindowlessGlxApplication(), @ref createContext(),
     @ref tryCreateContext()
 */
-class WindowlessGlxApplication::Configuration {
+class WindowlessCglApplication::Configuration {
     public:
         constexpr /*implicit*/ Configuration() {}
 };
@@ -179,7 +171,7 @@ aliased to `MAGNUM_WINDOWLESSAPPLICATION_MAIN()`.
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef MAGNUM_WINDOWLESSAPPLICATION_MAIN
-typedef WindowlessGlxApplication WindowlessApplication;
+typedef WindowlessCglApplication WindowlessApplication;
 #define MAGNUM_WINDOWLESSAPPLICATION_MAIN(className) MAGNUM_WINDOWLESSGLXAPPLICATION_MAIN(className)
 #else
 #undef MAGNUM_WINDOWLESSAPPLICATION_MAIN

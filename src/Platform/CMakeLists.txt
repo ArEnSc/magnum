@@ -149,6 +149,16 @@ if(WITH_WINDOWLESSGLXAPPLICATION)
         ARCHIVE DESTINATION ${MAGNUM_LIBRARY_INSTALL_DIR})
 endif()
 
+# Windowless CGL application
+if(WITH_WINDOWLESSCGLAPPLICATION)
+    add_library(MagnumWindowlessCglApplication STATIC WindowlessCglApplication.cpp)
+    install(FILES WindowlessCglApplication.h DESTINATION ${MAGNUM_INCLUDE_INSTALL_DIR}/Platform)
+    install(TARGETS MagnumWindowlessCglApplication
+        RUNTIME DESTINATION ${MAGNUM_BINARY_INSTALL_DIR}
+        LIBRARY DESTINATION ${MAGNUM_LIBRARY_INSTALL_DIR}
+        ARCHIVE DESTINATION ${MAGNUM_LIBRARY_INSTALL_DIR})
+endif()
+
 # Abstract X application
 if(NEED_ABSTRACTXAPPLICATION)
     add_library(MagnumAbstractXApplication OBJECT AbstractXApplication.cpp)
@@ -186,6 +196,9 @@ if(WITH_MAGNUMINFO)
         target_link_libraries(magnum-info MagnumWindowlessGlxApplication ${X11_LIBRARIES})
     elseif(CORRADE_TARGET_NACL)
         target_link_libraries(magnum-info MagnumWindowlessNaClApplication ppapi_cpp ppapi)
+    elseif(APPLE)
+        find_library(OpenGL_LIBRARY OpenGL)
+        target_link_libraries(magnum-info MagnumWindowlessCglApplication ${OpenGL_LIBRARY})
     endif()
     target_link_libraries(magnum-info Magnum)
 
