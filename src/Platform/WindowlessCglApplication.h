@@ -25,7 +25,7 @@
 */
 
 /** @file
- * @brief Class @ref Magnum::Platform::WindowlessGlxApplication
+ * @brief Class @ref Magnum::Platform::WindowlessCglApplication
  */
 
 #include <utility>
@@ -40,31 +40,31 @@
 namespace Magnum { namespace Platform {
 
 /**
-@brief Windowless GLX application
+@brief Windowless CGL application
 
-Application for offscreen rendering using pure X11 and GLX.
+Application for offscreen rendering using pure CGL.
 
 This application library is available on desktop OpenGL and
 @ref MAGNUM_TARGET_DESKTOP_GLES "OpenGL ES emulation on desktop" on Linux. It
-depends on **X11** library and is built if `WITH_WINDOWLESSGLXAPPLICATION` is
-enabled in CMake. To use it, you need to request `%WindowlessGlxApplication`
-component in CMake, add `${MAGNUM_WINDOWLESSGLXAPPLICATION_INCLUDE_DIRS}` to
-include path and link to `${MAGNUM_WINDOWLESSGLXAPPLICATION_LIBRARIES}`. If no
+depends on **X11** library and is built if `WITH_WINDOWLESSCGLAPPLICATION` is
+enabled in CMake. To use it, you need to request `%WindowlessCglApplication`
+component in CMake, add `${MAGNUM_WINDOWLESSCGLAPPLICATION_INCLUDE_DIRS}` to
+include path and link to `${MAGNUM_WINDOWLESCCGLAPPLICATION_LIBRARIES}`. If no
 other windowless application is requested, you can also use generic
 `${MAGNUM_WINDOWLESSAPPLICATION_INCLUDE_DIRS}` and
 `${MAGNUM_WINDOWLESSAPPLICATION_LIBRARIES}` aliases to simplify porting. See
 @ref building and @ref cmake for more information.
 
-@section WindowlessGlxApplication-usage Usage
+@section WindowlessCglApplication-usage Usage
 
 Place your code into @ref exec(). The subclass can be then used directly in
-`main()` -- see convenience macro @ref MAGNUM_WINDOWLESSGLXAPPLICATION_MAIN().
+`main()` -- see convenience macro @ref MAGNUM_WINDOWLESSCGLAPPLICATION_MAIN().
 See @ref platform for more information.
 @code
-class MyApplication: public Platform::WindowlessGlxApplication {
+class MyApplication: public Platform::WindowlessCglApplication {
     // implement required methods...
 };
-MAGNUM_WINDOWLESSGLXAPPLICATION_MAIN(MyApplication)
+MAGNUM_WINDOWLESSCGLAPPLICATION_MAIN(MyApplication)
 @endcode
 
 If no other application header is included, this class is also aliased to
@@ -112,7 +112,7 @@ class WindowlessCglApplication {
         virtual int exec() = 0;
 
     protected:
-        /* Nobody will need to have (and delete) WindowlessGlxApplication*,
+        /* Nobody will need to have (and delete) WindowlessCglApplication*,
            thus this is faster than public pure virtual destructor */
         ~WindowlessCglApplication();
 
@@ -139,7 +139,7 @@ class WindowlessCglApplication {
 /**
 @brief %Configuration
 
-@see @ref WindowlessGlxApplication(), @ref createContext(),
+@see @ref WindowlessCglApplication(), @ref createContext(),
     @ref tryCreateContext()
 */
 class WindowlessCglApplication::Configuration {
@@ -148,10 +148,10 @@ class WindowlessCglApplication::Configuration {
 };
 
 /** @hideinitializer
-@brief Entry point for windowless GLX application
+@brief Entry point for windowless CGL application
 @param className Class name
 
-Can be used with @ref Magnum::Platform::WindowlessGlxApplication "Platform::WindowlessGlxApplication"
+Can be used with @ref Magnum::Platform::WindowlessCglApplication "Platform::WindowlessCglApplication"
 subclasses as equivalent to the following code to achieve better portability,
 see @ref portability-applications for more information.
 @code
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 When no other windowless application header is included this macro is also
 aliased to `MAGNUM_WINDOWLESSAPPLICATION_MAIN()`.
 */
-#define MAGNUM_WINDOWLESSGLXAPPLICATION_MAIN(className)                     \
+#define MAGNUM_WINDOWLESSCGLAPPLICATION_MAIN(className)                     \
     int main(int argc, char** argv) {                                       \
         className app({argc, argv});                                        \
         return app.exec();                                                  \
@@ -172,7 +172,7 @@ aliased to `MAGNUM_WINDOWLESSAPPLICATION_MAIN()`.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef MAGNUM_WINDOWLESSAPPLICATION_MAIN
 typedef WindowlessCglApplication WindowlessApplication;
-#define MAGNUM_WINDOWLESSAPPLICATION_MAIN(className) MAGNUM_WINDOWLESSGLXAPPLICATION_MAIN(className)
+#define MAGNUM_WINDOWLESSAPPLICATION_MAIN(className) MAGNUM_WINDOWLESSCGLAPPLICATION_MAIN(className)
 #else
 #undef MAGNUM_WINDOWLESSAPPLICATION_MAIN
 #endif

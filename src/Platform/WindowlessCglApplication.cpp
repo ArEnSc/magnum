@@ -60,71 +60,55 @@ bool WindowlessCglApplication::tryCreateContext(const Configuration&) {
     int nPix = 0;
     GLint major, minor;
     CGLGetVersion(&major, &minor);
-    
+    CGLError cglError;
     
     if(major == 2 && minor < 1) {
         Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 2.1 or greater is required";
         return false;
     }
-
-    /* Try core version first */
-    CGLPixelFormatAttribute pfAttributesGL4[4] = {
+    
+    CGLPixelFormatAttribute pfAttributesGL_3_2[4] = {
         kCGLPFAAccelerated,
         kCGLPFAOpenGLProfile,
-        (CGLPixelFormatAttribute) kCGLOGLPVersion_GL4_Core,
+        (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,
         (CGLPixelFormatAttribute) 0
     };
     
-    CGLError cglError = CGLChoosePixelFormat(pfAttributesGL4,&pixelFormat,&nPix);
+    cglError = CGLChoosePixelFormat(pfAttributesGL_3_2,&pixelFormat,&nPix);
     
-    if (cglError == kCGLBadPixelFormat){
-        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 4.0 has failed trying GL version 3.2";
+    if (cglError == kCGLBadPixelFormat)
+    {
+        Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 3.2 has failed trying GL version 3.0";
         
-        CGLPixelFormatAttribute pfAttributesGL3_2[4] = {
+        CGLPixelFormatAttribute pfAttributesGL3[4] = {
             kCGLPFAAccelerated,
             kCGLPFAOpenGLProfile,
-            (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,
+            (CGLPixelFormatAttribute) kCGLOGLPVersion_GL3_Core,
             (CGLPixelFormatAttribute) 0
         };
         
-        cglError = CGLChoosePixelFormat(pfAttributesGL3_2,&pixelFormat,&nPix);
+        cglError = CGLChoosePixelFormat(pfAttributesGL3,&pixelFormat,&nPix);
         
-        if (cglError == kCGLBadPixelFormat)
-        {
-            Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 3.2 has failed trying GL version 3.0";
+        if (cglError == kCGLBadPixelFormat){
+            Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 3.0 has failed trying GL version Legacy";
             
-            CGLPixelFormatAttribute pfAttributesGL3[4] = {
+            CGLPixelFormatAttribute pfAttributesLegacy[4] = {
                 kCGLPFAAccelerated,
                 kCGLPFAOpenGLProfile,
-                (CGLPixelFormatAttribute) kCGLOGLPVersion_GL3_Core,
+                (CGLPixelFormatAttribute) kCGLOGLPVersion_Legacy,
                 (CGLPixelFormatAttribute) 0
             };
             
-            cglError = CGLChoosePixelFormat(pfAttributesGL3,&pixelFormat,&nPix);
+            cglError = CGLChoosePixelFormat(pfAttributesLegacy,&pixelFormat,&nPix);
             
-            if (cglError == kCGLBadPixelFormat){
-                Error() << "Platform::WindowlessCglApplication::tryCreateContext(): OpenGL version 3.0 has failed trying GL version Legacy";
-                
-                CGLPixelFormatAttribute pfAttributesLegacy[4] = {
-                    kCGLPFAAccelerated,
-                    kCGLPFAOpenGLProfile,
-                    (CGLPixelFormatAttribute) kCGLOGLPVersion_Legacy,
-                    (CGLPixelFormatAttribute) 0
-                };
-                
-                cglError = CGLChoosePixelFormat(pfAttributesLegacy,&pixelFormat,&nPix);
-                
-                if(cglError == kCGLBadPixelFormat){
-                    Error() << "Platform::WindowlessCglApplication::tryCreateContext(): Context could not be created";
-                    return false;
-                }
+            if(cglError == kCGLBadPixelFormat){
+                Error() << "Platform::WindowlessCglApplication::tryCreateContext(): Context could not be created";
+                return false;
             }
         }
     }
-
     
     cglError = CGLCreateContext(pixelFormat, NULL, &context);
-    
 
     if(cglError == kCGLBadContext) {
         Error() << "Platform::WindowlessCglApplication::tryCreateContext(): cannot create context";
@@ -133,7 +117,6 @@ bool WindowlessCglApplication::tryCreateContext(const Configuration&) {
     
     cglError = CGLSetCurrentContext(context);
 
-    
     c = new Context;
     return true;
 }
